@@ -18,17 +18,15 @@ states = np.array([(health, arrows, stamina) for health in range(num_h)
 
 
 def value_iteration():
-    utilities = {}
+    utilities = np.zeros(shape=(num_h, num_a, num_s))
 
     for health, arrows, stamina in states:
-
-        state = str(health) + str(arrows) + str(stamina)
-        utilities[state] = 0
+        utilities[health, arrows, stamina] = 0
 
     iterations = 0
 
     while True:
-        new_utilities = {}
+        new_utilities = np.zeros(shape=(num_h, num_a, num_s))
 
         print("iteration=", iterations)
 
@@ -37,7 +35,7 @@ def value_iteration():
             cur_state = str(health) + str(arrows) + str(stamina)
 
             if health == 0:
-                new_utilities[cur_state] = 0
+                new_utilities[health, arrows, stamina] = 0
                 continue
 
             cur_max = -1000000000000
@@ -64,14 +62,14 @@ def value_iteration():
                     else:
                         total_reward += (step_cost + non_terminal_reward) * transition_prob[cur_state][action][new_state]
 
-                    cur += gamma * transition_prob[cur_state][action][new_state] * utilities[new_state]
+                    cur += gamma * transition_prob[cur_state][action][new_state] * utilities[h, a, s]
 
                 cur += total_reward
 
                 if cur_max < cur:
                     cur_max = cur
 
-            new_utilities[cur_state] = cur_max
+            new_utilities[health, arrows, stamina] = cur_max
 
         for health, arrows, stamina in states:
 
@@ -103,20 +101,15 @@ def value_iteration():
                     else:
                         total_reward += (step_cost + non_terminal_reward) * transition_prob[cur_state][action][new_state]
 
-                    cur += gamma * transition_prob[cur_state][action][new_state] * new_utilities[new_state]
+                    cur += gamma * transition_prob[cur_state][action][new_state] * new_utilities[h, a, s]
 
                 if cur_max < cur:
                     cur_max = cur
                     cur_action = action
 
-            print(cur_state, cur_action, round(new_utilities[cur_state], 3))
+            print(cur_state, cur_action, round(new_utilities[health, arrows, stamina], 3))
 
-        converged = True
-
-        for i in utilities:
-            if abs(new_utilities[i] - utilities[i]) >= delta:
-                converged = False
-                break
+        converged = np.max(np.abs(new_utilities - utilities)) < delta
 
         if converged:
             break
