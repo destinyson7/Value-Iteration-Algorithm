@@ -51,15 +51,3 @@ for health in range(5):
 
 
 # print(transition_prob)
-
-# for health in range(5):
-#     for arrows in range(4):
-#         for stamina in range(3):
-
-#             for h in range(5):
-#                 for a in range(4):
-#                     for s in range(3):
-#                         state1 = str(health) + str(arrows) + str(stamina)
-#                         state2 = str(h) + str(a) + str(s)
-#                         if(transition_prob[state1]["DODGE"][state2] != 0):
-#                             print(state1, state2, transition_prob[state1]["DODGE"][state2])

@@ -56,12 +56,12 @@ def value_iteration():
                         for h in range(num_h):
                             for a in range(num_a):
                                 for s in range(num_s):
-                                    
+
                                     new_state = str(h) + str(a) + str(s)
                                     if h == 0:
                                         total_reward += (step_cost + terminal_reward) * transition_prob[cur_state][action][new_state]
                                     else:
-                                        total_reward += (step_cost + non_terminal_reward)*transition_prob[cur_state][action][new_state]
+                                        total_reward += (step_cost + non_terminal_reward) * transition_prob[cur_state][action][new_state]
                                     cur += gamma * transition_prob[cur_state][action][new_state] * utilities[new_state]
                         cur += total_reward
                         if cur_max < cur:
@@ -74,13 +74,14 @@ def value_iteration():
         # print()
         # print(new_utilities)
 
-        for health in range(0, num_h):
+        for health in range(num_h):
             for arrows in range(num_a):
                 for stamina in range(num_s):
                     cur_state = str(health) + str(arrows) + str(stamina)
                     if health == 0:
                         print(cur_state, "-1 0")
                         continue
+
                     cur_max = -100000000000
                     cur_action = ""
 
@@ -103,7 +104,8 @@ def value_iteration():
                                     if h == 0:
                                         total_reward += (step_cost + terminal_reward) * transition_prob[cur_state][action][new_state]
                                     else:
-                                        total_reward += (step_cost + non_terminal_reward)*transition_prob[cur_state][action][new_state]
+                                        total_reward += (step_cost + non_terminal_reward) * transition_prob[cur_state][action][new_state]
+
                                     cur += gamma * transition_prob[cur_state][action][new_state] * new_utilities[new_state]
 
                         # print(cur, cur_max)
