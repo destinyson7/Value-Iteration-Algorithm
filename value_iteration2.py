@@ -1,6 +1,5 @@
 from transition_prob import *
-
-# print(transition_prob)
+import numpy as np
 
 num_h = 5
 num_a = 4
@@ -13,107 +12,104 @@ terminal_reward = 10
 
 actions = ["SHOOT", "DODGE", "RECHARGE"]
 
+states = np.array([(health, arrows, stamina) for health in range(num_h)
+                   for arrows in range(num_a)
+                   for stamina in range(num_s)])
+
 
 def value_iteration():
     utilities = {}
 
-    for health in range(num_h):
-        for arrows in range(num_a):
-            for stamina in range(num_s):
+    for health, arrows, stamina in states:
 
-                state = str(health) + str(arrows) + str(stamina)
-                utilities[state] = 0
+        state = str(health) + str(arrows) + str(stamina)
+        utilities[state] = 0
 
     iterations = 0
 
     while True:
-        # new_utilities = utilities
         new_utilities = {}
 
         print("iteration=", iterations)
 
-        for health in range(num_h):
-            for arrows in range(num_a):
-                for stamina in range(num_s):
-                    cur_state = str(health) + str(arrows) + str(stamina)
-                    if health == 0:
-                        new_utilities[cur_state] = 0
-                        continue
-                    cur_max = -1000000000000
+        for health, arrows, stamina in states:
 
-                    for action in actions:
+            cur_state = str(health) + str(arrows) + str(stamina)
 
-                        if action == "SHOOT":
-                            if stamina == 0 or arrows == 0:
-                                continue
+            if health == 0:
+                new_utilities[cur_state] = 0
+                continue
 
-                        elif action == "DODGE" and stamina == 0:
-                            continue
+            cur_max = -1000000000000
 
-                        total_reward = 0
-                        cur = 0
+            for action in actions:
 
-                        for h in range(num_h):
-                            for a in range(num_a):
-                                for s in range(num_s):
-
-                                    new_state = str(h) + str(a) + str(s)
-                                    if h == 0:
-                                        total_reward += (step_cost + terminal_reward) * transition_prob[cur_state][action][new_state]
-                                    else:
-                                        total_reward += (step_cost + non_terminal_reward) * transition_prob[cur_state][action][new_state]
-                                    cur += gamma * transition_prob[cur_state][action][new_state] * utilities[new_state]
-                        cur += total_reward
-                        if cur_max < cur:
-                            cur_max = cur
-
-                    new_utilities[cur_state] = cur_max
-
-        # print(utilities)
-        # print()
-        # print()
-        # print(new_utilities)
-
-        for health in range(num_h):
-            for arrows in range(num_a):
-                for stamina in range(num_s):
-                    cur_state = str(health) + str(arrows) + str(stamina)
-                    if health == 0:
-                        print(cur_state, "-1 0")
+                if action == "SHOOT":
+                    if stamina == 0 or arrows == 0:
                         continue
 
-                    cur_max = -100000000000
-                    cur_action = ""
+                elif action == "DODGE" and stamina == 0:
+                    continue
 
-                    for action in actions:
+                total_reward = 0
+                cur = 0
 
-                        if action == "SHOOT":
-                            if stamina == 0 or arrows == 0:
-                                continue
+                for h, a, s in states:
 
-                        elif action == "DODGE" and stamina == 0:
-                            continue
+                    new_state = str(h) + str(a) + str(s)
 
-                        cur = 0
+                    if h == 0:
+                        total_reward += (step_cost + terminal_reward) * transition_prob[cur_state][action][new_state]
 
-                        for h in range(num_h):
-                            for a in range(num_a):
-                                for s in range(num_s):
-                                    new_state = str(h) + str(a) + str(s)
+                    else:
+                        total_reward += (step_cost + non_terminal_reward) * transition_prob[cur_state][action][new_state]
 
-                                    if h == 0:
-                                        total_reward += (step_cost + terminal_reward) * transition_prob[cur_state][action][new_state]
-                                    else:
-                                        total_reward += (step_cost + non_terminal_reward) * transition_prob[cur_state][action][new_state]
+                    cur += gamma * transition_prob[cur_state][action][new_state] * utilities[new_state]
 
-                                    cur += gamma * transition_prob[cur_state][action][new_state] * new_utilities[new_state]
+                cur += total_reward
 
-                        # print(cur, cur_max)
-                        if cur_max < cur:
-                            cur_max = cur
-                            cur_action = action
+                if cur_max < cur:
+                    cur_max = cur
 
-                    print(cur_state, cur_action, round(new_utilities[cur_state], 3))
+            new_utilities[cur_state] = cur_max
+
+        for health, arrows, stamina in states:
+
+            cur_state = str(health) + str(arrows) + str(stamina)
+
+            if health == 0:
+                print(cur_state, "-1 0")
+                continue
+
+            cur_max = -100000000000
+            cur_action = ""
+
+            for action in actions:
+
+                if action == "SHOOT":
+                    if stamina == 0 or arrows == 0:
+                        continue
+
+                elif action == "DODGE" and stamina == 0:
+                    continue
+
+                cur = 0
+
+                for h, a, s in states:
+                    new_state = str(h) + str(a) + str(s)
+
+                    if h == 0:
+                        total_reward += (step_cost + terminal_reward) * transition_prob[cur_state][action][new_state]
+                    else:
+                        total_reward += (step_cost + non_terminal_reward) * transition_prob[cur_state][action][new_state]
+
+                    cur += gamma * transition_prob[cur_state][action][new_state] * new_utilities[new_state]
+
+                if cur_max < cur:
+                    cur_max = cur
+                    cur_action = action
+
+            print(cur_state, cur_action, round(new_utilities[cur_state], 3))
 
         converged = True
 
@@ -127,6 +123,7 @@ def value_iteration():
 
         utilities = new_utilities
         iterations += 1
+
         print()
         print()
 

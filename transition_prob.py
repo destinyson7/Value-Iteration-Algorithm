@@ -17,12 +17,13 @@ for health in range(5):
             state = str(health) + str(arrows) + str(stamina)
             transition_prob[state] = {"SHOOT": get_states(), "DODGE": get_states(), "RECHARGE": get_states()}
 
-# print(transition_prob)
+
 for health in range(5):
     for arrows in range(4):
         for stamina in range(3):
 
             state = str(health) + str(arrows) + str(stamina)
+
             # Recharge
             next_state1 = str(health) + str(arrows) + str(stamina)
             next_state2 = str(health) + str(arrows) + str(min(2, stamina + 1))
