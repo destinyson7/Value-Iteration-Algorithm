@@ -41,8 +41,8 @@ for health, arrows, stamina in states:
 
     next_state1 = tuple([health, arrows, max(stamina - 1, 0)])
     next_state2 = tuple([health, arrows, max(stamina - 2, 0)])
-    next_state3 = tuple([health, min(arrows + 1, 3), max(stamina - 1, 0)])
-    next_state4 = tuple([health, min(arrows + 1, 3), max(stamina - 2, 0)])
+    next_state3 = tuple([health, min(arrows + 1, num_a - 1), max(stamina - 1, 0)])
+    next_state4 = tuple([health, min(arrows + 1, num_a - 1), max(stamina - 2, 0)])
 
     transition_prob[state]["DODGE"][next_state1] += 0.16
     transition_prob[state]["DODGE"][next_state2] += 0.04
