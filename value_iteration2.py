@@ -9,6 +9,7 @@ delta = 0.001
 step_cost = -20
 non_terminal_reward = 0
 terminal_reward = 10
+inf = 1e17
 
 actions = ["SHOOT", "DODGE", "RECHARGE"]
 
@@ -32,13 +33,13 @@ def value_iteration():
 
         for health, arrows, stamina in states:
 
-            cur_state = str(health) + str(arrows) + str(stamina)
+            cur_state = tuple([health, arrows, stamina])
 
             if health == 0:
                 new_utilities[health, arrows, stamina] = 0
                 continue
 
-            cur_max = -1000000000000
+            cur_max = -inf
 
             for action in actions:
 
@@ -54,7 +55,7 @@ def value_iteration():
 
                 for h, a, s in states:
 
-                    new_state = str(h) + str(a) + str(s)
+                    new_state = tuple([h, a, s])
 
                     if h == 0:
                         total_reward += (step_cost + terminal_reward) * transition_prob[cur_state][action][new_state]
@@ -73,13 +74,13 @@ def value_iteration():
 
         for health, arrows, stamina in states:
 
-            cur_state = str(health) + str(arrows) + str(stamina)
+            cur_state = tuple([health, arrows, stamina])
 
             if health == 0:
                 print(cur_state, "-1 0")
                 continue
 
-            cur_max = -100000000000
+            cur_max = -inf
             cur_action = ""
 
             for action in actions:
@@ -94,7 +95,7 @@ def value_iteration():
                 cur = 0
 
                 for h, a, s in states:
-                    new_state = str(h) + str(a) + str(s)
+                    new_state = tuple([h, a, s])
 
                     if h == 0:
                         total_reward += (step_cost + terminal_reward) * transition_prob[cur_state][action][new_state]
