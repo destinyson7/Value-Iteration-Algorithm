@@ -98,7 +98,7 @@ def value_iteration():
                             continue
 
                         cur = 0
-
+                        total_reward = 0
                         for h in range(num_h):
                             for a in range(num_a):
                                 for s in range(num_s):

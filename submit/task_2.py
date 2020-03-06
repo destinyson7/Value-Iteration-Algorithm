@@ -3,9 +3,13 @@ import numpy as np
 num_h = 5
 num_a = 4
 num_s = 3
-gamma = 0.99
+gamma = 0.99    
 delta = 0.001
-step_cost = -20
+step_cost = {
+    "SHOOT": -.25,
+    "RECHARGE": -2.5,
+    "DODGE": -2.5
+}
 non_terminal_reward = 0
 terminal_reward = 10
 inf = 1e17
@@ -105,10 +109,10 @@ def get_utilities(utilities):
                 new_state = tuple([h, a, s])
 
                 if h == 0:
-                    total_reward += (step_cost + terminal_reward) * transition_prob[cur_state][action][new_state]
+                    total_reward += (step_cost[action] + terminal_reward) * transition_prob[cur_state][action][new_state]
 
                 else:
-                    total_reward += (step_cost + non_terminal_reward) * transition_prob[cur_state][action][new_state]
+                    total_reward += (step_cost[action] + non_terminal_reward) * transition_prob[cur_state][action][new_state]
 
                 cur += gamma * transition_prob[cur_state][action][new_state] * utilities[h, a, s]
 
@@ -150,12 +154,14 @@ def get_action(new_utilities):
                 new_state = tuple([h, a, s])
 
                 if h == 0:
-                    total_reward += (step_cost + terminal_reward) * transition_prob[cur_state][action][new_state]
+                    total_reward += (step_cost[action] + terminal_reward) * transition_prob[cur_state][action][new_state]
                 else:
-                    total_reward += (step_cost + non_terminal_reward) * transition_prob[cur_state][action][new_state]
+                    total_reward += (step_cost[action] + non_terminal_reward) * transition_prob[cur_state][action][new_state]
 
                 cur += gamma * transition_prob[cur_state][action][new_state] * new_utilities[h, a, s]
+            
             cur += total_reward
+
             if cur_max < cur:
                 cur_max = cur
                 cur_action = action
