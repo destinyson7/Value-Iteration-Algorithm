@@ -86,8 +86,6 @@ def get_transition_probabilities():
 
 transition_prob = get_transition_probabilities()
 
-# print(transition_prob)
-
 
 def get_utilities(utilities):
     new_utilities = np.zeros(shape=(num_h, num_a, num_s))
