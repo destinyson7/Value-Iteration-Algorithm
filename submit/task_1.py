@@ -206,7 +206,7 @@ def value_iteration():
         iterations += 1
 
         to_print.append("\n")
-        to_print.append("\n")
+        # to_print.append("\n")
 
 
 value_iteration()
