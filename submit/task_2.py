@@ -3,10 +3,10 @@ import numpy as np
 num_h = 5
 num_a = 4
 num_s = 3
-gamma = 0.99    
-delta = 0.001
+gamma = 0.1
+delta = 1e-3
 step_cost = {
-    "SHOOT": -.25,
+    "SHOOT": -2.5,
     "RECHARGE": -2.5,
     "DODGE": -2.5
 }
@@ -159,7 +159,7 @@ def get_action(new_utilities):
                     total_reward += (step_cost[action] + non_terminal_reward) * transition_prob[cur_state][action][new_state]
 
                 cur += gamma * transition_prob[cur_state][action][new_state] * new_utilities[h, a, s]
-            
+
             cur += total_reward
 
             if cur_max < cur:

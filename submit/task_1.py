@@ -4,7 +4,7 @@ num_h = 5
 num_a = 4
 num_s = 3
 gamma = 0.99
-delta = 0.001
+delta = 1e-3
 step_cost = -20
 non_terminal_reward = 0
 terminal_reward = 10
@@ -12,9 +12,11 @@ inf = 1e17
 
 actions = ["SHOOT", "DODGE", "RECHARGE"]
 
-states = np.array([(health, arrows, stamina) for health in range(num_h)
-                   for arrows in range(num_a)
-                   for stamina in range(num_s)])
+states = [(health, arrows, stamina) for health in range(num_h)
+          for arrows in range(num_a)
+          for stamina in range(num_s)]
+
+to_print = []
 
 
 def get_states():
@@ -29,7 +31,8 @@ def get_transition_probabilities():
     transition_prob = {}
 
     for health, arrows, stamina in states:
-        transition_prob[tuple([health, arrows, stamina])] = {"SHOOT": get_states(), "DODGE": get_states(), "RECHARGE": get_states()}
+        transition_prob[tuple([health, arrows, stamina])] = {
+            "SHOOT": get_states(), "DODGE": get_states(), "RECHARGE": get_states()}
 
     for health, arrows, stamina in states:
         state = tuple([health, arrows, stamina])
@@ -49,8 +52,10 @@ def get_transition_probabilities():
 
         next_state1 = tuple([health, arrows, max(stamina - 1, 0)])
         next_state2 = tuple([health, arrows, max(stamina - 2, 0)])
-        next_state3 = tuple([health, min(arrows + 1, num_a - 1), max(stamina - 1, 0)])
-        next_state4 = tuple([health, min(arrows + 1, num_a - 1), max(stamina - 2, 0)])
+        next_state3 = tuple(
+            [health, min(arrows + 1, num_a - 1), max(stamina - 1, 0)])
+        next_state4 = tuple(
+            [health, min(arrows + 1, num_a - 1), max(stamina - 2, 0)])
 
         transition_prob[state]["DODGE"][next_state1] += 0.16
         transition_prob[state]["DODGE"][next_state2] += 0.04
@@ -62,8 +67,10 @@ def get_transition_probabilities():
         if(arrows == 0):
             continue
 
-        next_state1 = tuple([max(health - 1, 0), max(arrows - 1, 0), max(stamina - 1, 0)])
-        next_state2 = tuple([max(health, 0), max(arrows - 1, 0), max(stamina - 1, 0)])
+        next_state1 = tuple(
+            [max(health - 1, 0), max(arrows - 1, 0), max(stamina - 1, 0)])
+        next_state2 = tuple([max(health, 0), max(
+            arrows - 1, 0), max(stamina - 1, 0)])
 
         transition_prob[state]["SHOOT"][next_state1] += 0.5
         transition_prob[state]["SHOOT"][next_state2] += 0.5
@@ -105,12 +112,16 @@ def get_utilities(utilities):
                 new_state = tuple([h, a, s])
 
                 if h == 0:
-                    total_reward += (step_cost + terminal_reward) * transition_prob[cur_state][action][new_state]
+                    total_reward += (step_cost + terminal_reward) * \
+                        transition_prob[cur_state][action][new_state]
 
                 else:
-                    total_reward += (step_cost + non_terminal_reward) * transition_prob[cur_state][action][new_state]
+                    total_reward += (step_cost + non_terminal_reward) * \
+                        transition_prob[cur_state][action][new_state]
 
-                cur += gamma * transition_prob[cur_state][action][new_state] * utilities[h, a, s]
+                cur += gamma * \
+                    transition_prob[cur_state][action][new_state] * \
+                    utilities[h, a, s]
 
             cur += total_reward
 
@@ -128,7 +139,8 @@ def get_action(new_utilities):
         cur_state = tuple([health, arrows, stamina])
 
         if health == 0:
-            print("({},{},{}):{}=[{}]".format(health, arrows, stamina, -1, round(new_utilities[health, arrows, stamina], 3)))
+            to_print.append(
+                f"({health},{arrows},{stamina}):{-1}=[{round(new_utilities[health, arrows, stamina], 3)}]")
             continue
 
         cur_max = -inf
@@ -150,17 +162,22 @@ def get_action(new_utilities):
                 new_state = tuple([h, a, s])
 
                 if h == 0:
-                    total_reward += (step_cost + terminal_reward) * transition_prob[cur_state][action][new_state]
+                    total_reward += (step_cost + terminal_reward) * \
+                        transition_prob[cur_state][action][new_state]
                 else:
-                    total_reward += (step_cost + non_terminal_reward) * transition_prob[cur_state][action][new_state]
+                    total_reward += (step_cost + non_terminal_reward) * \
+                        transition_prob[cur_state][action][new_state]
 
-                cur += gamma * transition_prob[cur_state][action][new_state] * new_utilities[h, a, s]
+                cur += gamma * \
+                    transition_prob[cur_state][action][new_state] * \
+                    new_utilities[h, a, s]
             cur += total_reward
             if cur_max < cur:
                 cur_max = cur
                 cur_action = action
 
-        print("({},{},{}):{}=[{}]".format(health, arrows, stamina, cur_action, round(new_utilities[health, arrows, stamina], 3)))
+        to_print.append(
+            f"({health},{arrows},{stamina}):{cur_action}=[{round(new_utilities[health, arrows, stamina], 3)}]")
 
 
 def hasConverged(utilities, new_utilities):
@@ -174,7 +191,7 @@ def value_iteration():
 
     while True:
 
-        print("iteration={}".format(iterations))
+        to_print.append(f"iteration={iterations}")
 
         new_utilities = get_utilities(utilities)
 
@@ -188,8 +205,11 @@ def value_iteration():
         utilities = new_utilities
         iterations += 1
 
-        print()
-        print()
+        to_print.append("\n")
+        to_print.append("\n")
 
 
 value_iteration()
+
+for i in to_print:
+    print(i)
