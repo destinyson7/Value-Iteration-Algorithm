@@ -5,7 +5,11 @@ num_a = 4
 num_s = 3
 gamma = 0.99
 delta = 1e-3
-step_cost = -20
+step_cost = {
+    "SHOOT": -5,
+    "DODGE": -5,
+    "RECHARGE": -5
+}
 non_terminal_reward = 0
 terminal_reward = 10
 inf = 1e17
@@ -17,6 +21,7 @@ states = [(health, arrows, stamina) for health in range(num_h)
           for stamina in range(num_s)]
 
 to_print = []
+all_tasks = []
 
 
 def get_states():
@@ -112,11 +117,11 @@ def get_utilities(utilities):
                 new_state = tuple([h, a, s])
 
                 if h == 0:
-                    total_reward += (step_cost + terminal_reward) * \
+                    total_reward += (step_cost[action] + terminal_reward) * \
                         transition_prob[cur_state][action][new_state]
 
                 else:
-                    total_reward += (step_cost + non_terminal_reward) * \
+                    total_reward += (step_cost[action] + non_terminal_reward) * \
                         transition_prob[cur_state][action][new_state]
 
                 cur += gamma * \
@@ -162,10 +167,10 @@ def get_action(new_utilities):
                 new_state = tuple([h, a, s])
 
                 if h == 0:
-                    total_reward += (step_cost + terminal_reward) * \
+                    total_reward += (step_cost[action] + terminal_reward) * \
                         transition_prob[cur_state][action][new_state]
                 else:
-                    total_reward += (step_cost + non_terminal_reward) * \
+                    total_reward += (step_cost[action] + non_terminal_reward) * \
                         transition_prob[cur_state][action][new_state]
 
                 cur += gamma * \
@@ -185,12 +190,12 @@ def hasConverged(utilities, new_utilities):
 
 
 def value_iteration():
+
     utilities = np.zeros(shape=(num_h, num_a, num_s))
 
     iterations = 0
 
     while True:
-
         to_print.append(f"iteration={iterations}")
 
         new_utilities = get_utilities(utilities)
@@ -208,7 +213,32 @@ def value_iteration():
         to_print.append("\n")
 
 
-value_iteration()
+for i in range(4):
+    if i == 1:
+        step_cost["SHOOT"] = -0.25
+        step_cost["DODGE"] = -2.5
+        step_cost["RECHARGE"] = -2.5
 
-for i in to_print:
-    print(i)
+    elif i == 2:
+        step_cost["SHOOT"] = -2.5
+        gamma = 0.1
+
+    elif i == 3:
+        delta = 1e-10
+
+    value_iteration()
+
+    all_tasks.append(to_print)
+    to_print = []
+
+with open('./outputs/task_1_trace.txt', 'w') as f:
+    f.writelines("%s\n" % line for line in all_tasks[0])
+
+with open('./outputs/task_2_part_1_trace.txt', 'w') as f:
+    f.writelines("%s\n" % line for line in all_tasks[1])
+
+with open('./outputs/task_2_part_2_trace.txt', 'w') as f:
+    f.writelines("%s\n" % line for line in all_tasks[2])
+
+with open('./outputs/task_2_part_3_trace.txt', 'w') as f:
+    f.writelines("%s\n" % line for line in all_tasks[3])
