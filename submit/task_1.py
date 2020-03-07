@@ -1,4 +1,5 @@
 import numpy as np
+import os
 
 num_h = 5
 num_a = 4
@@ -231,14 +232,15 @@ for i in range(4):
     all_tasks.append(to_print)
     to_print = []
 
-with open('./outputs/task_1_trace.txt', 'w') as f:
+os.makedirs(os.path.dirname("./outputs/"), exist_ok=True)
+with open('./outputs/task_1_trace.txt', 'w+') as f:
     f.writelines("%s\n" % line for line in all_tasks[0])
 
-with open('./outputs/task_2_part_1_trace.txt', 'w') as f:
+with open('./outputs/task_2_part_1_trace.txt', 'w+') as f:
     f.writelines("%s\n" % line for line in all_tasks[1])
 
-with open('./outputs/task_2_part_2_trace.txt', 'w') as f:
+with open('./outputs/task_2_part_2_trace.txt', 'w+') as f:
     f.writelines("%s\n" % line for line in all_tasks[2])
 
-with open('./outputs/task_2_part_3_trace.txt', 'w') as f:
+with open('./outputs/task_2_part_3_trace.txt', 'w+') as f:
     f.writelines("%s\n" % line for line in all_tasks[3])
