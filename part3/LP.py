@@ -52,12 +52,18 @@ class LinearProgram:
 				else:
 					return 0
 			elif action == "DODGE":
-				if final_number_of_arrows == initial_number_of_arrows and (final_stamina == initial_stamina - 1 or final_stamina == initial_stamina - 2) and final_enemy_health == initial_enemy_health:
-					return -0.1
-				elif final_number_of_arrows == initial_number_of_arrows + 1 and (final_stamina == initial_stamina - 1 or final_stamina == initial_stamina - 2) and final_enemy_health == initial_enemy_health:
-					return -0.4
+				if initial_stamina == 2:
+					if final_number_of_arrows == initial_number_of_arrows and (final_stamina == initial_stamina - 1 or final_stamina == initial_stamina - 2) and final_enemy_health == initial_enemy_health:
+						return -0.1
+					elif final_number_of_arrows == initial_number_of_arrows + 1 and (final_stamina == initial_stamina - 1 or final_stamina == initial_stamina - 2) and final_enemy_health == initial_enemy_health:
+						return -0.4
+					else:
+						return 0
 				else:
-					return 0
+					if (final_number_of_arrows == initial_number_of_arrows or final_number_of_arrows == initial_number_of_arrows + 1) and (final_stamina == initial_stamina - 1) and final_enemy_health == initial_enemy_health:
+						return -0.5
+					else:
+						return 0
 			elif action == "SHOOT":
 				if final_number_of_arrows == initial_number_of_arrows - 1 and final_stamina == initial_stamina - 1 and final_enemy_health == initial_enemy_health:
 					return -0.5
@@ -74,6 +80,14 @@ class LinearProgram:
 					cur_list.append(self.flow(initial_state, final_state, action))
 			self.A.append(cur_list);
 
+	def initialize_reward(self):
+		for cur_state in self.states:
+			for action in self.possible_actions[cur_state]:
+				enemy_health = cur_state[0]
+				if enemy_health == 0:
+					self.reward.append(0)
+				else:
+					self.reward.append(self.penalty)
 
 
 	def __init__(self):
@@ -92,10 +106,13 @@ class LinearProgram:
 		}
 		self.states = []
 		self.A = []
+		self.reward = []
 		self.possible_actions = {}
+		self.penalty = -10
 
 linearProgram = LinearProgram()
 linearProgram.initialize_states()
 linearProgram.initialize_possible_actions()
 linearProgram.initialize_Amatrix()
-print(linearProgram.A)
+linearProgram.initialize_reward()
+print(linearProgram.reward)
