@@ -195,7 +195,7 @@ class LinearProgram:
         x = cp.Variable(shape = (self.total_actions, 1), name = 'x')
         # print(self.alpha.shape)
         print(cp.matmul(self.A, x))
-        constraints = [cp.matmul(self.A, x) == self.alpha]
+        constraints = [cp.matmul(self.A, x) == self.alpha, x >= 0]
         objective = cp.Maximize(cp.matmul(self.reward, x))
         problem = cp.Problem(objective, constraints)
 
