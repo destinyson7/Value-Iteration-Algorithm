@@ -70,41 +70,47 @@ class LinearProgram:
         action = self.convert_back[action]
         if initial_state == final_state:
             if action == "NOOP":
-                return 1
+                return 1.0
             elif action == "RECHARGE":
                 return 0.8
             elif action == "DODGE":
-                return 1
+                return 1.0
             elif action == "SHOOT":
-                return 1
+                return 1.0
         else:
             if action == "NOOP":
-                return 0
+                return 0.0
             elif action == "RECHARGE":
                 if final_number_of_arrows == initial_number_of_arrows and final_stamina == initial_stamina + 1 and final_enemy_health == initial_enemy_health:
                     return -0.8
                 else:
-                    return 0
+                    return 0.0
             elif action == "DODGE":
                 if initial_stamina == self.MAX_STAMINA:
-                    if final_number_of_arrows == initial_number_of_arrows and (final_stamina == initial_stamina - 1 or final_stamina == initial_stamina - 2) and final_enemy_health == initial_enemy_health:
+                    if final_number_of_arrows == self.MAX_ARROWS and initial_number_of_arrows == self.MAX_ARROWS and final_stamina == initial_stamina - 1 and final_enemy_health == initial_enemy_health:
+                        return -0.8
+                    elif final_number_of_arrows == self.MAX_ARROWS and initial_number_of_arrows == self.MAX_ARROWS and final_stamina == initial_stamina - 2 and final_enemy_health == initial_enemy_health:
+                        return -0.2
+                    elif final_number_of_arrows == initial_number_of_arrows and (final_stamina == initial_stamina - 1 or final_stamina == initial_stamina - 2) and final_enemy_health == initial_enemy_health:
                         return -0.1
                     elif final_number_of_arrows == initial_number_of_arrows + 1 and (final_stamina == initial_stamina - 1 or final_stamina == initial_stamina - 2) and final_enemy_health == initial_enemy_health:
                         return -0.4
                     else:
-                        return 0
+                        return 0.0
                 else:
-                    if (final_number_of_arrows == initial_number_of_arrows or final_number_of_arrows == initial_number_of_arrows + 1) and (final_stamina == initial_stamina - 1) and final_enemy_health == initial_enemy_health:
+                    if final_number_of_arrows == self.MAX_ARROWS and initial_number_of_arrows == self.MAX_ARROWS and final_stamina == initial_stamina - 1 and final_enemy_health == initial_enemy_health:
+                        return -1
+                    elif (final_number_of_arrows == initial_number_of_arrows or final_number_of_arrows == initial_number_of_arrows + 1) and (final_stamina == initial_stamina - 1) and final_enemy_health == initial_enemy_health:
                         return -0.5
                     else:
-                        return 0
+                        return 0.0
             elif action == "SHOOT":
                 if final_number_of_arrows == initial_number_of_arrows - 1 and final_stamina == initial_stamina - 1 and final_enemy_health == initial_enemy_health:
                     return -0.5
                 elif final_number_of_arrows == initial_number_of_arrows - 1 and final_stamina == initial_stamina - 1 and final_enemy_health == initial_enemy_health - 1:
                     return -0.5
                 else:
-                    return 0
+                    return 0.0
 
     def initialize_Amatrix(self):
         for final_state in self.states:
