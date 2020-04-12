@@ -196,9 +196,11 @@ class LinearProgram:
         self.alpha = np.expand_dims(self.alpha, axis=1)
 
     def solve(self):
-        # print(self.A.shape)
-        x = cp.Variable(shape=(len((self.A)[0]), 1), name='x')
-        # print(cp.matmul(self.A, x))
+
+        x = cp.Variable(shape=(self.total_actions, 1), name='x')
+        # print(self.alpha.shape)
+        print(cp.matmul(self.A, x))
+
         constraints = [cp.matmul(self.A, x) == self.alpha, x >= 0]
         objective = cp.Maximize(cp.matmul(self.reward, x))
         problem = cp.Problem(objective, constraints)
