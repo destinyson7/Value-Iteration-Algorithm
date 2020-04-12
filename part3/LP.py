@@ -1,6 +1,6 @@
 import numpy as np
 import sys
-
+import cvxpy as cp
 
 class LinearProgram:
 
@@ -30,11 +30,14 @@ class LinearProgram:
         self.reward = []
         self.possible_actions = {}
         self.penalty = -10
+        self.alpha = []
+        self.total_actions = 0
 
         self.initialize_states()
         self.initialize_possible_actions()
         self.initialize_Amatrix()
         self.initialize_reward()
+        self.initialize_alpha()
 
     def initialize_states(self):
         self.states = [(enemy_health, number_of_arrows, stamina) for enemy_health in range(
@@ -57,6 +60,7 @@ class LinearProgram:
                     cur_possible_actions.append(self.actions["RECHARGE"])
             cur_possible_actions.sort()
             self.possible_actions[cur_state] = cur_possible_actions
+            self.total_actions += len(cur_possible_actions)
 
     def flow(self, initial_state, final_state, action):
         initial_enemy_health = initial_state[0]
@@ -174,6 +178,32 @@ class LinearProgram:
 
         self.reward = np.array(self.reward)
 
+    def initialize_alpha(self):
+        for cur_state in self.states:
+            health = cur_state[0]
+            arrows = cur_state[1]
+            stamina = cur_state[2]
+
+            if health == self.MAX_ENEMY_HEALTH and arrows == self.MAX_ARROWS and stamina == self.MAX_STAMINA:
+                self.alpha.append(1.0)
+            else:
+                self.alpha.append(0.0)
+        self.alpha = np.array(self.alpha)
+        self.alpha = np.expand_dims(self.alpha, axis=1)
+
+    def solve(self):
+        x = cp.Variable(shape = (self.total_actions, 1), name = 'x')
+        # print(self.alpha.shape)
+        print(cp.matmul(self.A, x))
+        constraints = [cp.matmul(self.A, x) == self.alpha]
+        objective = cp.Maximize(cp.matmul(self.reward, x))
+        problem = cp.Problem(objective, constraints)
+
+        solution = problem.solve()
+        print(solution)
+
+        print(x.value)
+
 
 linearProgram = LinearProgram()
 opt = np.get_printoptions()
@@ -182,4 +212,5 @@ print(linearProgram.A)
 np.set_printoptions(**opt)
 print()
 print(np.sum(np.sum(linearProgram.A, 0)))
-# print(linearProgram.reward)
+# print(linearProgram.total_actions)
+linearProgram.solve()
