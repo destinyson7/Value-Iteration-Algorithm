@@ -2,6 +2,7 @@ import numpy as np
 import sys
 import cvxpy as cp
 
+
 class LinearProgram:
 
     def __init__(self):
@@ -32,6 +33,9 @@ class LinearProgram:
         self.penalty = -10
         self.alpha = []
         self.total_actions = 0
+        self.x = []
+        self.objective = []
+        self.policy = {}
 
         self.initialize_states()
         self.initialize_possible_actions()
@@ -192,17 +196,28 @@ class LinearProgram:
         self.alpha = np.expand_dims(self.alpha, axis=1)
 
     def solve(self):
-        x = cp.Variable(shape = (self.total_actions, 1), name = 'x')
-        # print(self.alpha.shape)
-        print(cp.matmul(self.A, x))
-        constraints = [cp.matmul(self.A, x) == self.alpha]
+        # print(self.A.shape)
+        x = cp.Variable(shape=(len((self.A)[0]), 1), name='x')
+        # print(cp.matmul(self.A, x))
+        constraints = [cp.matmul(self.A, x) == self.alpha, x >= 0]
         objective = cp.Maximize(cp.matmul(self.reward, x))
         problem = cp.Problem(objective, constraints)
 
-        solution = problem.solve()
-        print(solution)
+        self.objective = problem.solve()
+        self.x = x.value.reshape(len(x.value))
 
-        print(x.value)
+    def get_policy(self):
+
+        index = 0
+
+        for state in self.states:
+            index_having_max_value = np.argmax(
+                self.x[index:index+len(self.possible_actions[state])])
+
+            self.policy[state] = self.convert_back[self.possible_actions[state]
+                                                   [index_having_max_value]]
+
+            index += len(self.possible_actions[state])
 
 
 linearProgram = LinearProgram()
@@ -211,6 +226,7 @@ np.set_printoptions(threshold=sys.maxsize)
 print(linearProgram.A)
 np.set_printoptions(**opt)
 print()
-print(np.sum(np.sum(linearProgram.A, 0)))
-# print(linearProgram.total_actions)
+# print(np.sum(np.sum(linearProgram.A, 0)))
 linearProgram.solve()
+linearProgram.get_policy()
+print(linearProgram.policy)
