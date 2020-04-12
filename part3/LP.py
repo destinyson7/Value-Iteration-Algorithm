@@ -30,11 +30,11 @@ class LinearProgram:
         self.A = []
         self.reward = []
         self.possible_actions = {}
-        self.penalty = -20
+        self.penalty = -10
         self.alpha = []
         self.total_actions = 0
         self.x = []
-        self.objective = []
+        self.objective = 0.0
         self.policy = {}
 
         self.initialize_states()
@@ -209,7 +209,7 @@ class LinearProgram:
 
         x = cp.Variable(shape=(self.total_actions, 1), name='x')
         # print(self.alpha.shape)
-        print(cp.matmul(self.A, x))
+        # print(cp.matmul(self.A, x))
 
         constraints = [cp.matmul(self.A, x) == self.alpha, x >= 0]
         objective = cp.Maximize(cp.matmul(self.reward, x))
@@ -226,8 +226,8 @@ class LinearProgram:
             index_having_max_value = np.argmax(
                 self.x[index:index+len(self.possible_actions[state])])
 
-            self.policy[state] = self.convert_back[self.possible_actions[state]
-                                                   [index_having_max_value]]
+            self.policy[state] = (self.convert_back[self.possible_actions[state]
+                                                    [index_having_max_value]], self.x[index + index_having_max_value])
 
             index += len(self.possible_actions[state])
 
@@ -235,11 +235,13 @@ class LinearProgram:
 linearProgram = LinearProgram()
 opt = np.get_printoptions()
 np.set_printoptions(threshold=sys.maxsize)
-print(linearProgram.A)
+# print(linearProgram.A)
 np.set_printoptions(**opt)
-print()
-print(np.sum(np.sum(linearProgram.A, 0)))
+# print()
+# print(np.sum(np.sum(linearProgram.A, 0)))
 linearProgram.solve()
 linearProgram.get_policy()
 print(linearProgram.policy)
-print(linearProgram.x)
+# print(linearProgram.x)
+print(linearProgram.objective)
+# print(linearProgram.reward)
