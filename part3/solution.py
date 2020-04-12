@@ -1,6 +1,9 @@
 import numpy as np
-import sys
 import cvxpy as cp
+import sys
+import json
+import os
+import shutil
 
 
 class LinearProgram:
@@ -35,13 +38,19 @@ class LinearProgram:
         self.total_actions = 0
         self.x = []
         self.objective = 0.0
-        self.policy = {}
+        self.policy = []
 
+        self.solve_lp()
+
+    def solve_lp(self):
         self.initialize_states()
         self.initialize_possible_actions()
         self.initialize_Amatrix()
         self.initialize_reward()
         self.initialize_alpha()
+        self.solve()
+        self.get_policy()
+        self.dump_to_file()
 
     def initialize_states(self):
         self.states = [(enemy_health, number_of_arrows, stamina) for enemy_health in range(
@@ -53,15 +62,21 @@ class LinearProgram:
             number_of_arrows = cur_state[1]
             stamina = cur_state[2]
             cur_possible_actions = []
+
             if enemy_health == 0:
                 cur_possible_actions.append(self.actions["NOOP"])
+
             else:
+
                 if number_of_arrows > 0 and stamina > 0:
                     cur_possible_actions.append(self.actions["SHOOT"])
+
                 if stamina > 0:
                     cur_possible_actions.append(self.actions["DODGE"])
+
                 if stamina < self.MAX_STAMINA:
                     cur_possible_actions.append(self.actions["RECHARGE"])
+
             cur_possible_actions.sort()
             self.possible_actions[cur_state] = cur_possible_actions
             self.total_actions += len(cur_possible_actions)
@@ -185,31 +200,24 @@ class LinearProgram:
         for cur_state in self.states:
             for action in self.possible_actions[cur_state]:
                 enemy_health = cur_state[0]
+
                 if enemy_health == 0:
                     self.reward.append(0)
+
                 else:
                     self.reward.append(self.penalty)
 
         self.reward = np.array(self.reward)
 
     def initialize_alpha(self):
-        for cur_state in self.states:
-            health = cur_state[0]
-            arrows = cur_state[1]
-            stamina = cur_state[2]
+        self.alpha = np.array([1.0 if state == (
+            self.MAX_ENEMY_HEALTH, self.MAX_ARROWS, self.MAX_STAMINA) else 0.0 for state in self.states])
 
-            if health == self.MAX_ENEMY_HEALTH and arrows == self.MAX_ARROWS and stamina == self.MAX_STAMINA:
-                self.alpha.append(1.0)
-            else:
-                self.alpha.append(0.0)
-        self.alpha = np.array(self.alpha)
         self.alpha = np.expand_dims(self.alpha, axis=1)
 
     def solve(self):
 
         x = cp.Variable(shape=(self.total_actions, 1), name='x')
-        # print(self.alpha.shape)
-        # print(cp.matmul(self.A, x))
 
         constraints = [cp.matmul(self.A, x) == self.alpha, x >= 0]
         objective = cp.Maximize(cp.matmul(self.reward, x))
@@ -226,22 +234,37 @@ class LinearProgram:
             index_having_max_value = np.argmax(
                 self.x[index:index+len(self.possible_actions[state])])
 
-            self.policy[state] = (self.convert_back[self.possible_actions[state]
-                                                    [index_having_max_value]], self.x[index + index_having_max_value])
+            self.policy.append(
+                [list(state), self.convert_back[self.possible_actions[state][index_having_max_value]]])
 
             index += len(self.possible_actions[state])
 
+        self.policy = np.array(self.policy)
 
-linearProgram = LinearProgram()
-opt = np.get_printoptions()
-np.set_printoptions(threshold=sys.maxsize)
-# print(linearProgram.A)
-np.set_printoptions(**opt)
-# print()
-# print(np.sum(np.sum(linearProgram.A, 0)))
-linearProgram.solve()
-linearProgram.get_policy()
-print(linearProgram.policy)
-# print(linearProgram.x)
-print(linearProgram.objective)
-# print(linearProgram.reward)
+    def dump_to_file(self):
+
+        output = {
+            "a": self.A.tolist(),
+            "r": self.reward.tolist(),
+            "alpha": np.squeeze(self.alpha).tolist(),
+            "x": self.x.tolist(),
+            "policy": self.policy.tolist(),
+            "objective": self.objective
+        }
+
+        try:
+            if os.path.exists('./outputs'):
+                shutil.rmtree('./outputs')
+
+            os.mkdir('./outputs')
+
+        except OSError as error:
+            print(error)
+            sys.exit()
+
+        with open("./outputs/output.json", "w") as fp:
+            json.dump(output, fp)
+
+
+if __name__ == "__main__":
+    linearProgram = LinearProgram()
