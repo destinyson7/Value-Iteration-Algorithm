@@ -68,47 +68,86 @@ class LinearProgram:
         final_stamina = final_state[2]
 
         action = self.convert_back[action]
+
         if initial_state == final_state:
+
             if action == "NOOP":
                 return 1.0
+
             elif action == "RECHARGE":
                 return 0.8
+
             elif action == "DODGE":
                 return 1.0
+
             elif action == "SHOOT":
                 return 1.0
+
         else:
+
             if action == "NOOP":
                 return 0.0
+
             elif action == "RECHARGE":
+
                 if final_number_of_arrows == initial_number_of_arrows and final_stamina == initial_stamina + 1 and final_enemy_health == initial_enemy_health:
                     return -0.8
+
                 else:
                     return 0.0
+
             elif action == "DODGE":
+
                 if initial_stamina == self.MAX_STAMINA:
+
                     if final_number_of_arrows == self.MAX_ARROWS and initial_number_of_arrows == self.MAX_ARROWS and final_stamina == initial_stamina - 1 and final_enemy_health == initial_enemy_health:
                         return -0.8
+
                     elif final_number_of_arrows == self.MAX_ARROWS and initial_number_of_arrows == self.MAX_ARROWS and final_stamina == initial_stamina - 2 and final_enemy_health == initial_enemy_health:
                         return -0.2
-                    elif final_number_of_arrows == initial_number_of_arrows and (final_stamina == initial_stamina - 1 or final_stamina == initial_stamina - 2) and final_enemy_health == initial_enemy_health:
-                        return -0.1
-                    elif final_number_of_arrows == initial_number_of_arrows + 1 and (final_stamina == initial_stamina - 1 or final_stamina == initial_stamina - 2) and final_enemy_health == initial_enemy_health:
-                        return -0.4
+
+                    elif final_number_of_arrows == initial_number_of_arrows and final_enemy_health == initial_enemy_health:
+                        if final_stamina == initial_stamina - 1:
+                            return -0.16
+
+                        elif final_stamina == initial_stamina - 2:
+                            return -0.04
+
+                        else:
+                            return 0.0
+
+                    elif final_number_of_arrows == initial_number_of_arrows + 1 and final_enemy_health == initial_enemy_health:
+                        if final_stamina == initial_stamina - 1:
+                            return -0.64
+
+                        elif final_stamina == initial_stamina - 2:
+                            return -0.16
+
+                        else:
+                            return 0.0
+
                     else:
                         return 0.0
+
                 else:
+
                     if final_number_of_arrows == self.MAX_ARROWS and initial_number_of_arrows == self.MAX_ARROWS and final_stamina == initial_stamina - 1 and final_enemy_health == initial_enemy_health:
                         return -1
+
                     elif (final_number_of_arrows == initial_number_of_arrows or final_number_of_arrows == initial_number_of_arrows + 1) and (final_stamina == initial_stamina - 1) and final_enemy_health == initial_enemy_health:
                         return -0.5
+
                     else:
                         return 0.0
+
             elif action == "SHOOT":
+
                 if final_number_of_arrows == initial_number_of_arrows - 1 and final_stamina == initial_stamina - 1 and final_enemy_health == initial_enemy_health:
                     return -0.5
+
                 elif final_number_of_arrows == initial_number_of_arrows - 1 and final_stamina == initial_stamina - 1 and final_enemy_health == initial_enemy_health - 1:
                     return -0.5
+
                 else:
                     return 0.0
 
@@ -141,5 +180,6 @@ opt = np.get_printoptions()
 np.set_printoptions(threshold=sys.maxsize)
 print(linearProgram.A)
 np.set_printoptions(**opt)
+print()
 print(np.sum(np.sum(linearProgram.A, 0)))
-print(linearProgram.reward)
+# print(linearProgram.reward)
